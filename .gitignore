@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Variables de entorno y credenciales
+.env
+.env.local
+.env.*.local
+
+# Configuración local de base de datos
+config/database.local.php
+
+# Logs
+*.log
+logs/
+
+# Uploads y archivos generados por usuarios
+public/uploads/
+storage/
+
+# Dependencias (si en el futuro usamos Composer)
+vendor/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operativo Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
