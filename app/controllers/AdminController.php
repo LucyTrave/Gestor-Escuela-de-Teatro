@@ -947,7 +947,7 @@ if (!$stmt) {
 }
 
 $stmt->bind_param(
-    "sssssiissi",
+    "ssssssissi",
     $dia_semana,
     $hora_inicio,
     $hora_fin,
@@ -1272,6 +1272,7 @@ public function crearGrupo()
     // Si entra por GET, muestra el formulario
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         require ROOT . '/config/database.php';
+
         $profesores = $conexion->query(
             "SELECT p.usuario_id, p.nombre, p.apellidos FROM profesor p
              INNER JOIN usuario u ON u.id = p.usuario_id
@@ -1295,44 +1296,43 @@ public function crearGrupo()
         $hora_inicio = $_POST['hora_inicio'] ?? '';
         $nivel = $_POST['nivel'] ?? '';
         $curso = $_POST['curso'] ?? '';
+        $tipo = $_POST['tipo'] ?? 'teatro';
         $sala_id = intval($_POST['sala_id'] ?? 0);
         $hora_inicio = $_POST['hora_inicio'] ?? '';
         $hora_fin = $_POST['hora_fin'] ?? '';
-
         $cupo_maximo = (int)($_POST['cupo_maximo'] ?? 16);
-
         $fecha_inicio_curso = $_POST['fecha_inicio_curso'] ?? '';
         $fecha_fin_curso = $_POST['fecha_fin_curso'] ?? '';
-
         $profesor_id = $_POST['profesor_id'] ?? '';
         $activo = 1;
 
         require ROOT . '/config/database.php';
 
-        $sql = "INSERT INTO grupo
-                (nombre, dia_semana, hora_inicio, hora_fin, nivel, curso, sala_id, profesor_id, fecha_inicio_curso, fecha_fin_curso, activo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO grupo
+        (nombre, dia_semana, hora_inicio, hora_fin, nivel, tipo, curso, sala_id, profesor_id, fecha_inicio_curso, fecha_fin_curso, activo)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        $stmt = $conexion->prepare($sql);
+$stmt = $conexion->prepare($sql);
 
-        if (!$stmt) {
-            die("Error preparando la consulta: " . $conexion->error);
-        }
+if (!$stmt) {
+    die("Error preparando la consulta: " . $conexion->error);
+}
 
-        $stmt->bind_param(
-        "ssssssisssi",
-        $nombre,
-        $dia_semana,
-        $hora_inicio,
-        $hora_fin,
-        $nivel,
-        $curso,
-        $sala_id,
-        $profesor_id,
-        $fecha_inicio_curso,
-        $fecha_fin_curso,
-        $activo
-        );
+$stmt->bind_param(
+    "sssssssisssi",
+    $nombre,
+    $dia_semana,
+    $hora_inicio,
+    $hora_fin,
+    $nivel,
+    $tipo,
+    $curso,
+    $sala_id,
+    $profesor_id,
+    $fecha_inicio_curso,
+    $fecha_fin_curso,
+    $activo
+);
 
 
         if ($stmt->execute()) {

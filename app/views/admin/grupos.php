@@ -232,6 +232,28 @@ mejor el espacio entre tarjetas y la distribución en diferentes tamaños de pan
     background:#fff1f2;
     border-color:#f43f5e;
     color:#e11d48;
+    font-size: 11px;
+font-weight: 600;
+}
+
+/* TEATRO */
+.badge-tipo-teatro{
+    background:#dbeafe;
+    border-color:#3b82f6;
+    color:#1d4ed8;
+    font-weight: 800;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+
+/* IMPROVISACIÓN */
+.badge-tipo-improvisacion{
+    background:#fff7ed;
+    border-color:#f97316;
+    color:#ea580c;
+    font-weight: 800;
+letter-spacing: 1px;
+text-transform: uppercase;
 }
 
 /* =====================================================
@@ -377,7 +399,30 @@ mejor el espacio entre tarjetas y la distribución en diferentes tamaños de pan
     box-sizing: border-box;
 }
 
+/* ===== ESTILO SALAS ===== */
 
+.admin-space-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2, 1fr) !important;
+    gap:20px !important;
+    margin-top:20px;
+}
+
+.admin-space-card{
+    background:#f8fbff;
+    border:1px solid #93c5fd !important;
+    border-radius:12px;
+    padding:22px;
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+}
+
+.admin-space-card h3{
+    margin:0 0 14px 0;
+    font-size:28px;
+    font-weight:800;
+}
 
 
 </style>
@@ -450,32 +495,49 @@ mejor el espacio entre tarjetas y la distribución en diferentes tamaños de pan
         <!-- BLOQUE DE SALAS Y ESPACIOS -->
         <section id="seccion-salas" class="admin-seccion-grupos admin-tab-contenido">
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
 
-                <div class="titulo-seccion">
-                    Salas y espacios disponibles
-                </div>
+    <div class="titulo-seccion">
+        Salas y espacios disponibles
+    </div>
 
-                <button type="button" class="btn-crear btn-crear-rojo" id="abrirModalSala">
-                    + Nueva sala
-                </button>
+    <button type="button" class="btn-crear btn-crear-rojo" id="abrirModalSala">
+        + Nueva sala
+    </button>
 
-            </div>
+    </div>
 
             <div class="admin-space-grid">
 
-                <?php foreach ($salas as $sala): ?>
+<?php foreach ($salas as $sala): ?>
 
-                    <article class="admin-space-card">
+    <article class="admin-space-card">
 
-                        <strong><?= htmlspecialchars($sala['nombre']) ?></strong>
+        <h3 style="
+            margin:0 0 14px 0;
+            font-size:24px;
+            font-weight:800;
+            line-height:1.1;
+        ">
+            <?= htmlspecialchars($sala['nombre']) ?>
+        </h3>
 
-                        <p>📍 <?= htmlspecialchars($sala['direccion']) ?></p>
 
-                        <span style="display:block; margin-bottom:14px;">
-                            🏢 <?= htmlspecialchars($sala['espacio_nombre']) ?>
-                        </span>
+<div style="
+    margin-bottom:16px;
+    font-size:20px;
+    color:#444;
+">
+    📍 <?= htmlspecialchars($sala['direccion']) ?>
+</div>
 
+<div style="
+    margin-bottom:20px;
+    font-size:15px;
+    color:#666;
+">
+    🏢 <?= htmlspecialchars($sala['espacio_nombre']) ?>
+</div>
                         <div class="admin-grupo-acciones">
 
                             <button
@@ -606,76 +668,66 @@ mejor el espacio entre tarjetas y la distribución en diferentes tamaños de pan
 
 
 <!-- Nivel y contador alineados arriba -->
-<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:8px; width:100%;">
+<div style="display:block; margin-bottom:8px; width:100%;">
 
-    <div style="flex:1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+   <div style="flex:1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
 
-        <span class="badge badge-<?= $nivel ?>">
-        <?= htmlspecialchars(ucfirst($grupo['nivel'] ?? 'Sin nivel')) ?>
+    <?php if (!empty($grupo['tipo'])): ?>
+        <span class="badge badge-tipo badge-tipo-<?= strtolower($grupo['tipo']) ?>">
+           <?= htmlspecialchars(strtoupper($grupo['tipo'])) ?>
         </span>
+    <?php endif; ?>
 
-        <?php if (!empty($grupo['curso'])): ?>
-            <span class="badge badge-curso">
-               Curso <?= htmlspecialchars($grupo['curso']) ?> 
-            </span>
-        <?php endif; ?>
+    <span class="badge badge-<?= $nivel ?>">
+        <?= htmlspecialchars(ucfirst($grupo['nivel'] ?? 'Sin nivel')) ?>
+    </span>
 
-    </div>
-
-    <div style="text-align:right; min-width:120px; margin-left:auto;">
-        <div style="font-size:22px; font-weight:700; line-height:1;">
-            <?= $totalAlumnos ?>/<?= $maxAlumnos ?>
-        </div>
-
-        <div style="font-size:11px; color:#333;">
-            Alumnos
-        </div>
-    </div>
+    <?php if (!empty($grupo['curso'])): ?>
+        <span class="badge badge-curso">
+            Curso <?= htmlspecialchars($grupo['curso']) ?>
+        </span>
+    <?php endif; ?>
 
 </div>
 
 <!-- Título del grupo debajo -->
-<h2 style="margin:0 0 12px 0; font-size:28px; line-height:1.1; font-weight:800;;">
+<h2 style="margin:16px 0 12px 0; font-size:28px; line-height:1.1; font-weight:800;">
     <?= htmlspecialchars($grupo['nombre'] ?? 'Grupo') ?>
 </h2>
 
-<?php if (!empty($grupo['clases'])): ?> 
-    <?php foreach ($grupo['clases'] as $clase): ?> 
-        <div style=" font-size:13px; color:#666; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:6px; "> 
-            <span>🕒</span> 
-            <span> 
-                <?= htmlspecialchars(ucfirst($grupo['dia_semana'])) ?>
-                ·
-                <?= htmlspecialchars(substr($clase['hora_inicio'], 0, 5)) ?> 
-                - 
-                <?= htmlspecialchars(substr($clase['hora_fin'], 0, 5)) ?> 
-            </span> 
-        </div> 
-    <?php endforeach; ?> 
-<?php else: ?> 
-    <div style="font-size:13px; color:#999;"> Sin horarios </div> 
-<?php endif; ?>
+<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
 
-    <!-- Datos secundarios debajo -->
+    <?php if (!empty($grupo['clases'])): ?> 
+        <?php foreach ($grupo['clases'] as $clase): ?> 
+            <div class="admin-group-meta">
+                <span>
+                    🕒 <?= htmlspecialchars(ucfirst($grupo['dia_semana'])) ?>
+                    ·
+                    <?= htmlspecialchars(substr($clase['hora_inicio'], 0, 5)) ?> 
+                    - 
+                    <?= htmlspecialchars(substr($clase['hora_fin'], 0, 5)) ?> 
+                </span>
+            </div>
+        <?php endforeach; ?> 
+    <?php else: ?> 
+        <div class="admin-group-meta">
+            <span>🕒 Sin horarios</span>
+        </div>
+    <?php endif; ?>
+
     <div class="admin-group-meta">
         <span>
-    👨‍🏫 Profesor:
-    <?= htmlspecialchars(explode(' ', $grupo['profesor_nombre'])[0] ?? 'Sin profesor') ?>
-</span>
+            👨‍🏫 Profesor:
+            <?= htmlspecialchars(explode(' ', $grupo['profesor_nombre'])[0] ?? 'Sin profesor') ?>
+        </span>
     </div>
 
     <div class="admin-group-meta">
-        <span>📍 <?= htmlspecialchars(($grupo['espacio_nombre'] ?? 'Sin espacio') . ' - ' . ($grupo['sala_nombre'] ?? 'Sin sala')) ?></span>
+        <span>
+            📍 <?= htmlspecialchars(($grupo['espacio_nombre'] ?? 'Sin espacio') . ' - ' . ($grupo['sala_nombre'] ?? 'Sin sala')) ?>
+        </span>
     </div>
 
-</div>
-
-    <p style="margin-top:10px; margin-bottom:4px; font-size:12px; color:#666;">
-    Ocupación <?= $porcentaje ?>%
-    </p>
-
-    <div class="admin-progress">
-    <div style="width: <?= $porcentaje ?>%; background: <?= $colorBarra ?>;"></div>
 </div>
 
 <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
@@ -739,7 +791,7 @@ mejor el espacio entre tarjetas y la distribución en diferentes tamaños de pan
 <?php if ($modalAlumnosActivo && $grupoModal !== null): ?>
 
 <div class="admin-modal activo">
-    <div class="admin-modal-contenido" style="max-width: 520px; width:92%;">
+    <div class="admin-modal-contenido" style="max-width: 680px; width:95%; overflow-x:hidden;">
 
         <?php
         $grupo = $grupoModal;
@@ -1635,23 +1687,32 @@ Swal.fire({
 </div>
 
 
-<!-- NIVEL Y PROFESOR -->
-
-<div class="admin-modal-grid">
+<!-- CURSO Y NIVEL -->
+<div class="admin-modal-grid" style="margin-top:16px;">
 
     <div>
         <label>Curso *</label>
-
         <select name="curso" required>
             <option value="">Selecciona Curso</option>
-            <option value="1º">2025-2026</option>
-            <option value="2º">2026-2027</option>
+
+            <?php
+            $anioInicio = 2025;
+            $totalCursos = 10;
+
+            for ($i = 0; $i < $totalCursos; $i++):
+                $inicio = $anioInicio + $i;
+                $fin = $inicio + 1;
+                $curso = $inicio . '-' . $fin;
+            ?>
+                <option value="<?= $curso ?>">
+                    <?= $curso ?>
+                </option>
+            <?php endfor; ?>
         </select>
     </div>
 
     <div>
         <label>Nivel *</label>
-
         <select name="nivel" required>
             <option value="iniciacion">Iniciación</option>
             <option value="intermedio">Intermedio</option>
@@ -1661,11 +1722,19 @@ Swal.fire({
 
 </div>
 
+<!-- CLASE Y PROFESOR -->
 <div class="admin-modal-grid" style="margin-top:16px;">
 
     <div>
-        <label>Profesor *</label>
+        <label>Clase *</label>
+        <select name="tipo" required>
+            <option value="teatro">TEATRO</option>
+            <option value="improvisacion">IMPROVISACIÓN</option>
+        </select>
+    </div>
 
+    <div>
+        <label>Profesor *</label>
         <select name="profesor_id" required>
             <option value="">Selecciona un profesor</option>
 
@@ -1676,16 +1745,15 @@ Swal.fire({
             <?php endforeach; ?>
         </select>
     </div>
-</div>    
+
+</div>
 
 <!-- SALA -->
-
-<div class="admin-modal-campo-full">
+<div class="admin-modal-campo-full" style="margin-top:16px;">
 
     <label>Sala *</label>
 
     <select name="sala_id" required>
-
         <option value="">Selecciona una sala</option>
 
         <?php foreach ($salas as $sala): ?>
@@ -1697,30 +1765,30 @@ Swal.fire({
                 ) ?>
             </option>
         <?php endforeach; ?>
-
     </select>
 
 </div>
 
+<div class="admin-modal-grid" style="margin-top:16px;">
 
-<div>
-    <label>Fecha inicio curso *</label>
+    <div>
+        <label>Fecha inicio curso *</label>
+        <input
+            type="date"
+            name="fecha_inicio_curso"
+            required
+        >
+    </div>
 
-    <input
-        type="date"
-        name="fecha_inicio_curso"
-        required
-    >
-</div>
+    <div>
+        <label>Fecha fin curso *</label>
+        <input
+            type="date"
+            name="fecha_fin_curso"
+            required
+        >
+    </div>
 
-<div>
-    <label>Fecha fin curso *</label>
-
-    <input
-        type="date"
-        name="fecha_fin_curso"
-        required
-    >
 </div>
 
 
