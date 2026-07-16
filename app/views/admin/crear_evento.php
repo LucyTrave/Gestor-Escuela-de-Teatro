@@ -15,6 +15,16 @@
             <option value="salida_teatro">Salida teatro</option>
         </select>
 
+        <select name="profesor_id" required>
+    <option value="">Profesor</option>
+
+    <?php foreach ($profesores as $profesor): ?>
+        <option value="<?= (int)$profesor['usuario_id'] ?>">
+            <?= htmlspecialchars($profesor['nombre'] . ' ' . $profesor['apellidos']) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
         <input type="date" name="fecha" required>
         <div class="campo-formulario">
             <label for="hora">Hora</label>

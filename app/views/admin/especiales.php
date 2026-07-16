@@ -36,6 +36,22 @@
                         </div>
                     <?php endif; ?>
 
+<?php if (!empty($evento['profesor_nombre'])): ?>
+    <div class="evento-profesor">
+        👤 Profesor:
+        <?= htmlspecialchars(
+            trim(
+                $evento['profesor_nombre'] . ' ' .
+                ($evento['profesor_apellidos'] ?? '')
+            )
+        ) ?>
+    </div>
+<?php else: ?>
+    <div class="evento-profesor">
+        👤 Profesor no asignado
+    </div>
+<?php endif; ?>
+
                 </div>
 
                 <div class="tipo-evento">

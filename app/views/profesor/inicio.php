@@ -183,4 +183,69 @@ require __DIR__ . '/_header.php';
                 <?php endif; ?>
             </section>
 
+<section class="profesor-seccion">
+    <div class="titulo-seccion">
+        <i class="fas fa-star icono-titulo" aria-hidden="true"></i>
+        Próximos eventos especiales
+    </div>
+
+    <?php if (empty($eventosEspeciales)): ?>
+
+        <div class="agenda-vacio">
+            <i class="fas fa-calendar-times icono-vacio"></i>
+            <p>No tienes eventos especiales asignados.</p>
+        </div>
+
+    <?php else: ?>
+
+        <div class="agenda-lista">
+
+            <?php foreach ($eventosEspeciales as $evento): ?>
+
+    <a
+    class="agenda-card agenda-futuro"
+    href="<?= BASE_URL ?>/profesor/asistencia?tipo=evento&evento_id=<?= (int)$evento['id'] ?>"
+>
+
+                    <div class="agenda-emoji">🎭</div>
+
+                    <div class="agenda-info">
+
+                        <div class="agenda-nombre">
+                            <?= htmlspecialchars($evento['nombre']) ?>
+                        </div>
+
+                        <div class="agenda-meta">
+
+                            <span class="agenda-meta-item">
+                                📅 <?= date('d/m/Y', strtotime($evento['fecha'])) ?>
+                            </span>
+
+                            <?php if (!empty($evento['hora'])): ?>
+                                <span class="agenda-meta-item">
+                                    🕒 <?= substr($evento['hora'], 0, 5) ?>
+                                </span>
+                            <?php endif; ?>
+
+                            <span class="agenda-meta-item">
+                                👥 <?= (int)$evento['apuntados'] ?> inscritos
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <?php endforeach; ?>
+
+        </a>
+
+    <?php endif; ?>
+
+</section>
+
+
+
+
 <?php require __DIR__ . '/_footer.php'; ?>

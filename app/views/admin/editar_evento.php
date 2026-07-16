@@ -16,6 +16,24 @@
             <option value="salida_teatro"<?= $evento['tipo'] === 'salida_teatro' ? ' selected' : '' ?>>Salida teatro</option>
         </select>
 
+
+    <!-- Selector del profesor responsable del evento especial.
+     Se preselecciona el profesor que ya está guardado en la base de datos. -->
+<select name="profesor_id" required>
+    <option value="">Profesor</option>
+
+    <?php foreach ($profesores as $profesor): ?>
+        <option
+    value="<?= htmlspecialchars($profesor['usuario_id']) ?>"
+    <?= (string)$evento['profesor_id'] === (string)$profesor['usuario_id'] ? ' selected' : '' ?>
+>
+        >
+            <?= htmlspecialchars($profesor['nombre'] . ' ' . $profesor['apellidos']) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
+
         <input type="date" name="fecha" value="<?= $evento['fecha'] ?>" required>
         <div class="campo-formulario">
             <label for="hora">Hora</label>

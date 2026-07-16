@@ -190,7 +190,7 @@ class ProfesorController {
         }
         $this->redirect($ruta, $mensaje);
     }
-
+// Metodos de la clase ProfesorController (showPanel, alumnos, grupos, etc.) se encuentran aquí.
     public function showPanel(): void {
         $this->requireProfesorAuth();
         global $conexion;
@@ -258,6 +258,87 @@ class ProfesorController {
             $stmt->execute();
             $proximasClases = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
+
+
+    // Obtener los próximos eventos especiales asignados al profesor conectado.
+    if ($this->esAdmin()) {
+
+    // Si entra un administrador, puede ver todos los eventos especiales.
+    $stmtEventos = $conexion->prepare(
+        "SELECT
+            e.id,
+            e.nombre,
+            e.tipo,
+            e.descripcion,
+            e.fecha,
+            e.hora,
+            e.plazas_maximas,
+            p.nombre AS profesor_nombre,
+            p.apellidos AS profesor_apellidos,
+            COUNT(CASE WHEN i.estado = 'inscrito' THEN 1 END) AS apuntados
+         FROM evento_grupal e
+         LEFT JOIN profesor p
+            ON p.usuario_id = e.profesor_id
+         LEFT JOIN inscripcion_evento i
+            ON i.evento_id = e.id
+         WHERE e.fecha >= CURDATE()
+         GROUP BY
+            e.id,
+            e.nombre,
+            e.tipo,
+            e.descripcion,
+            e.fecha,
+            e.hora,
+            e.plazas_maximas,
+            p.nombre,
+            p.apellidos
+         ORDER BY e.fecha ASC, e.hora ASC"
+    );
+
+    $stmtEventos->execute();
+} else {
+    // Si entra un profesor, solo verá los eventos que tiene asignados.
+    $stmtEventos = $conexion->prepare(
+        "SELECT
+            e.id,
+            e.nombre,
+            e.tipo,
+            e.descripcion,
+            e.fecha,
+            e.hora,
+            e.plazas_maximas,
+            p.nombre AS profesor_nombre,
+            p.apellidos AS profesor_apellidos,
+            COUNT(CASE WHEN i.estado = 'inscrito' THEN 1 END) AS apuntados
+         FROM evento_grupal e
+         LEFT JOIN profesor p
+            ON p.usuario_id = e.profesor_id
+         LEFT JOIN inscripcion_evento i
+            ON i.evento_id = e.id
+         WHERE e.fecha >= CURDATE()
+           AND e.profesor_id = ?
+         GROUP BY
+            e.id,
+            e.nombre,
+            e.tipo,
+            e.descripcion,
+            e.fecha,
+            e.hora,
+            e.plazas_maximas,
+            p.nombre,
+            p.apellidos
+         ORDER BY e.fecha ASC, e.hora ASC"
+    );
+
+    $profesorId = $this->profesorId();
+    $stmtEventos->bind_param('s', $profesorId);
+    $stmtEventos->execute();
+}
+
+$eventosEspeciales = $stmtEventos
+    ->get_result()
+    ->fetch_all(MYSQLI_ASSOC);
+
 
         $vista = 'inicio';
         $mensaje = $this->mensaje($_GET['mensaje'] ?? '');
@@ -748,6 +829,8 @@ class ProfesorController {
 
         $vista     = 'grupos';
         $csrfToken = $this->csrfToken();
+
+
         require ROOT . '/app/views/profesor/grupos.php';
     }
 
@@ -1080,9 +1163,9 @@ class ProfesorController {
         $observacionesPorClase = $this->cargarObservaciones('clase', $idsClases);
 
         // ─── Tarjetas superiores ──────────────────────────────────────────────
-        // Regla: si hay clases hoy o manana, mostrar esas paginadas (modo "urgente").
-        //        Si no hay nada inmediato, mostrar las proximas programadas paginadas (modo "proximas").
-        // 6 tarjetas por pagina en ambos modos.
+        // Regla: si hay clases hoy o mañana, mostrar esas páginas (modo "urgente").
+        //        Si no hay nada inmediato, mostrar las próximas programadas paginadas (modo "proximas").
+        // 6 tarjetas por página en ambos modos.
         $pagina    = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
         $porPagina = 6;
         $offset    = ($pagina - 1) * $porPagina;
@@ -1227,6 +1310,7 @@ class ProfesorController {
         require ROOT . '/app/views/profesor/clases.php';
     }
 
+    // ─── ASISTENCIA ──────────────────────────────────────────────────────────────
     public function asistencia(): void {
         $this->requireProfesorAuth();
         global $conexion;
@@ -1235,20 +1319,44 @@ class ProfesorController {
         $porPagina = 4;
         $offset = ($pagina - 1) * $porPagina;
 
+        // Indica si el pase de lista corresponde a una clase o a un evento especial.
+        $tipo = $_GET['tipo'] ?? $_POST['tipo'] ?? 'clase';
+
         $claseId = (int)($_GET['clase_id'] ?? $_POST['clase_id'] ?? 0);
 
+        // Recoge el identificador del evento especial cuando el modo es "evento".
+        $eventoId = (int)($_GET['evento_id'] ?? $_POST['evento_id'] ?? 0);
+
+        // Evita valores manipulados o no previstos en la URL.
+        if (!in_array($tipo, ['clase', 'evento'], true)) {
+        $tipo = 'clase';
+        }
+
+        // Guarda en una sola variable el ID que corresponde al tipo seleccionado.
+        $idOrigen = ($tipo === 'evento') ? $eventoId : $claseId;
+
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'guardar') {
-            // Verifica el token CSRF antes de tocar la BBDD.
-            $rutaError = $claseId > 0
-                ? '/profesor/asistencia?clase_id=' . $claseId
-                : '/profesor/asistencia';
+
+            // Construye la ruta correcta según se esté guardando una clase o un evento.
+        $rutaError = $idOrigen > 0
+        ? '/profesor/asistencia?tipo=' . urlencode($tipo)
+        . ($tipo === 'evento'
+            ? '&evento_id=' . $eventoId
+            : '&clase_id=' . $claseId)
+        : '/profesor/asistencia?tipo=' . urlencode($tipo);
+
             $this->verificarCsrf($rutaError);
 
             $filas = $_POST['filas'] ?? [];
 
-            if ($claseId <= 0) {
-                $this->redirect('/profesor/asistencia', 'error_datos');
-            }
+           // Comprueba que exista un identificador válido para la clase o el evento.
+        if ($idOrigen <= 0) {
+            $this->redirect(
+        '/profesor/asistencia?tipo=' . urlencode($tipo),
+        'error_datos'
+    );
+    }
 
             foreach ($filas as $alumnoId => $datos) {
                 $alumnoId = (int)$alumnoId;
@@ -1257,17 +1365,41 @@ class ProfesorController {
                     continue;
                 }
 
-                $stmt = $conexion->prepare(
-                    "INSERT INTO asistencia (alumno_id, clase_id, estado, fecha_aviso, aviso_valido)
-                     VALUES (?, ?, ?, NULL, FALSE)
-                     ON DUPLICATE KEY UPDATE
-                        estado = VALUES(estado)"
-                );
-                $stmt->bind_param('iis', $alumnoId, $claseId, $estado);
-                $stmt->execute();
+             // Guarda la asistencia en la tabla correspondiente.
+if ($tipo === 'evento') {
+    $stmt = $conexion->prepare(
+        "INSERT INTO asistencia_evento
+            (alumno_id, evento_id, estado, fecha_aviso, aviso_valido)
+         VALUES (?, ?, ?, NULL, FALSE)
+         ON DUPLICATE KEY UPDATE
+            estado = VALUES(estado)"
+    );
+
+    $stmt->bind_param('iis', $alumnoId, $eventoId, $estado);
+} else {
+    $stmt = $conexion->prepare(
+        "INSERT INTO asistencia
+            (alumno_id, clase_id, estado, fecha_aviso, aviso_valido)
+         VALUES (?, ?, ?, NULL, FALSE)
+         ON DUPLICATE KEY UPDATE
+            estado = VALUES(estado)"
+    );
+
+    $stmt->bind_param('iis', $alumnoId, $claseId, $estado);
+}
+
+$stmt->execute();
             }
 
-            $this->redirectConClase('asistencia_guardada', $claseId);
+            // Vuelve al pase de lista correcto después de guardar.
+if ($tipo === 'evento') {
+    $this->redirect(
+        '/profesor/asistencia?tipo=evento&evento_id=' . $eventoId,
+        'asistencia_guardada'
+    );
+}
+
+$this->redirectConClase('asistencia_guardada', $claseId);
         }
 
         $mensaje = $this->mensaje($_GET['mensaje'] ?? '');
@@ -1337,7 +1469,83 @@ class ProfesorController {
         $avisos = [];
         $resumen = ['asiste' => 0, 'ausente' => 0, 'avisado' => 0];
 
-        if ($claseId > 0) {
+// Datos del evento especial cuando el pase de lista trabaja en modo evento.
+$detalleEvento = null;
+
+
+// Carga el evento especial y sus alumnos inscritos cuando el modo es "evento".
+if ($tipo === 'evento' && $eventoId > 0) {
+    $sqlDetalleEvento = "
+        SELECT
+            e.id,
+            e.nombre,
+            e.tipo,
+            e.descripcion,
+            e.fecha,
+            e.hora,
+            e.plazas_maximas
+        FROM evento_grupal e
+        WHERE e.id = ?
+    ";
+
+    if (!$this->esAdmin()) {
+        $sqlDetalleEvento .= " AND e.profesor_id = ?";
+        $stmt = $conexion->prepare($sqlDetalleEvento);
+        $profesorId = $this->profesorId();
+        $stmt->bind_param('is', $eventoId, $profesorId);
+    } else {
+        $stmt = $conexion->prepare($sqlDetalleEvento);
+        $stmt->bind_param('i', $eventoId);
+    }
+
+    $stmt->execute();
+    $detalleEvento = $stmt->get_result()->fetch_assoc();
+
+    if ($detalleEvento) {
+        $stmt = $conexion->prepare(
+            "SELECT
+                a.id,
+                a.nombre,
+                a.apellidos,
+                0 AS tokens_disponibles
+             FROM inscripcion_evento i
+             INNER JOIN alumno a ON a.id = i.alumno_id
+             WHERE i.evento_id = ?
+               AND i.estado = 'inscrito'
+             ORDER BY a.apellidos, a.nombre"
+        );
+        $stmt->bind_param('i', $eventoId);
+        $stmt->execute();
+        $alumnos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        $stmt = $conexion->prepare(
+            "SELECT alumno_id, estado, fecha_aviso, aviso_valido
+             FROM asistencia_evento
+             WHERE evento_id = ?"
+        );
+        $stmt->bind_param('i', $eventoId);
+        $stmt->execute();
+
+        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $registro) {
+            $aid = (int)$registro['alumno_id'];
+            $registros[$aid] = $registro['estado'];
+
+            if ($registro['estado'] === 'avisado') {
+                $avisos[$aid] = [
+                    'fecha_aviso'  => $registro['fecha_aviso'],
+                    'aviso_valido' => (int)$registro['aviso_valido'],
+                ];
+            }
+        }
+
+        foreach ($alumnos as $alumno) {
+            $estado = $registros[(int)$alumno['id']] ?? 'asiste';
+            $resumen[$estado]++;
+        }
+    }
+}
+       // Solo carga una clase cuando el pase de lista está en modo "clase".
+if ($tipo === 'clase' && $claseId > 0) {
             $sqlDetalle = "SELECT c.id, c.fecha, c.hora_inicio, c.hora_fin, c.estado, c.grupo_id,
                                   g.nombre AS grupo_nombre, g.tipo AS grupo_tipo, s.nombre AS sala_nombre
                            FROM clase c
@@ -1397,6 +1605,12 @@ class ProfesorController {
                 }
             }
         }
+
+
+// Unifica el detalle para que la vista pueda trabajar con clases y eventos.
+$detalleAsistencia = ($tipo === 'evento')
+    ? $detalleEvento
+    : $detalleClase;
 
         $vista     = 'asistencia';
         $csrfToken = $this->csrfToken();

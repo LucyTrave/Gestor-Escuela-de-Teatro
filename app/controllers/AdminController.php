@@ -432,18 +432,43 @@ $consultaDisponibles = "
         require ROOT . '/app/views/admin/grupos.php';
     }
 
+    // Consulta principal de eventos especiales
+    
     public function especiales(): void {
         $this->requireAdminAuth();
         global $conexion;
 
-        $resultado = $conexion->query(
-            "SELECT e.id, e.nombre, e.tipo, e.descripcion, e.fecha, e.hora, e.plazas_maximas,
-                    COUNT(CASE WHEN i.estado = 'inscrito' THEN 1 END) AS apuntados
-             FROM evento_grupal e
-             LEFT JOIN inscripcion_evento i ON i.evento_id = e.id
-             GROUP BY e.id
-             ORDER BY e.fecha ASC"
-        );
+$resultado = $conexion->query(
+    "SELECT
+        e.id,
+        e.nombre,
+        e.tipo,
+        e.descripcion,
+        e.fecha,
+        e.hora,
+        e.plazas_maximas,
+        e.profesor_id,
+        p.nombre AS profesor_nombre,
+        p.apellidos AS profesor_apellidos,
+        COUNT(CASE WHEN i.estado = 'inscrito' THEN 1 END) AS apuntados
+    FROM evento_grupal e
+    LEFT JOIN profesor p
+        ON e.profesor_id = p.usuario_id
+    LEFT JOIN inscripcion_evento i
+        ON i.evento_id = e.id
+    GROUP BY
+        e.id,
+        e.nombre,
+        e.tipo,
+        e.descripcion,
+        e.fecha,
+        e.hora,
+        e.plazas_maximas,
+        e.profesor_id,
+        p.nombre,
+        p.apellidos
+    ORDER BY e.fecha ASC"
+);
         $eventos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
 
         foreach ($eventos as &$evento) {
@@ -1157,10 +1182,27 @@ if ($result->num_rows > 0) {
 }
 
 //VISTA ESPECIALES
+//public function crearEvento(): void {
+   // $this->requireAdminAuth();
+   // require ROOT . '/app/views/admin/crear_evento.php';
+//}
+
 public function crearEvento(): void {
     $this->requireAdminAuth();
+    global $conexion;
+
+    $profesores = $conexion->query(
+        "SELECT p.usuario_id, p.nombre, p.apellidos 
+         FROM profesor p
+         INNER JOIN usuario u ON u.id = p.usuario_id
+         WHERE u.rol = 'profesor'
+         ORDER BY p.nombre ASC"
+    )->fetch_all(MYSQLI_ASSOC);
+
     require ROOT . '/app/views/admin/crear_evento.php';
 }
+
+
 
 public function guardarEvento(): void {
     $this->requireAdminAuth();
@@ -1173,17 +1215,28 @@ public function guardarEvento(): void {
     $plazas = (int)($_POST['plazas_maximas'] ?? 0);
     $hora = $_POST['hora'] ?? null;
     $descripcion = trim($_POST['descripcion'] ?? '');
+    $profesor_id = trim($_POST['profesor_id'] ?? '');
 
     if ($nombre === '' || $tipo === '' || $fecha === '' || $plazas <= 0) {
         $this->redirect('/admin/especiales/crear', 'error_datos');
     }
 
     $stmt = $conexion->prepare("
-        INSERT INTO evento_grupal (nombre, tipo, descripcion, fecha, hora, plazas_maximas)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ");
+    INSERT INTO evento_grupal
+    (nombre, tipo, descripcion, fecha, hora, plazas_maximas, profesor_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+");
 
-    $stmt->bind_param('sssssi', $nombre, $tipo, $descripcion, $fecha, $hora, $plazas);
+    $stmt->bind_param(
+    'sssssis',
+    $nombre,
+    $tipo,
+    $descripcion,
+    $fecha,
+    $hora,
+    $plazas,
+    $profesor_id
+);
     $stmt->execute();
 
     $this->redirect('/admin/especiales', 'evento_creado');
@@ -1210,6 +1263,15 @@ public function editarEvento(): void {
         $this->redirect('/admin/especiales', 'evento_no_encontrado');
     }
 
+    // Cargar los profesores para mostrarlos en el formulario de edición del evento.
+$profesores = $conexion->query(
+    "SELECT p.usuario_id, p.nombre, p.apellidos 
+     FROM profesor p
+     INNER JOIN usuario u ON u.id = p.usuario_id
+     WHERE u.rol = 'profesor'
+     ORDER BY p.nombre ASC"
+)->fetch_all(MYSQLI_ASSOC);
+
     require ROOT . '/app/views/admin/editar_evento.php';
 }
 
@@ -1218,30 +1280,45 @@ public function actualizarEvento(): void {
     global $conexion;
 
     $id = (int)($_POST['id'] ?? 0);
+    // Obtener el profesor seleccionado en el formulario de edición.
+$profesor_id = trim($_POST['profesor_id'] ?? '');
     $this->verificarCsrf($id > 0 ? '/admin/especiales/editar?id=' . $id : '/admin/especiales');
 
-    $stmt = $conexion->prepare("
-        UPDATE evento_grupal SET
-            nombre = ?, tipo = ?, descripcion = ?, fecha = ?, hora = ?, plazas_maximas = ?
-        WHERE id = ?
-    ");
+   // Actualizar todos los datos del evento, incluido el profesor responsable.
+$stmt = $conexion->prepare("
+    UPDATE evento_grupal SET
+        nombre = ?,
+        tipo = ?,
+        descripcion = ?,
+        fecha = ?,
+        hora = ?,
+        plazas_maximas = ?,
+        profesor_id = ?
+    WHERE id = ?
+");
 
-    $stmt->bind_param(
-        'sssssii',
-        $_POST['nombre'],
-        $_POST['tipo'],
-        $_POST['descripcion'],
-        $_POST['fecha'],
-        $_POST['hora'],
-        $_POST['plazas_maximas'],
-        $id
-    );
+// Enlazar los valores del formulario con los campos del UPDATE.
+// El orden debe coincidir exactamente con los signos ? de la consulta SQL.
 
-    $stmt->execute();
+$stmt->bind_param(
+    'sssssisi',
+    $_POST['nombre'],
+    $_POST['tipo'],
+    $_POST['descripcion'],
+    $_POST['fecha'],
+    $_POST['hora'],
+    $_POST['plazas_maximas'],
+    $profesor_id,
+    $id
+);
 
-    $this->redirect('/admin/especiales', 'evento_actualizado');
+// Ejecutar la actualización del evento especial.
+$stmt->execute();
+
+// Volver al listado de eventos especiales después de guardar los cambios.
+$this->redirect('/admin/especiales', 'evento_actualizado');
+
 }
-
 public function eliminarEvento(): void {
     $this->requireAdminAuth();
     $this->verificarCsrf('/admin/especiales');
@@ -1359,17 +1436,40 @@ $stmt->bind_param(
             die("Error preparando clase: " . $conexion->error);
         }
 
+$mapaDias = [
+    'lunes' => 1,
+    'martes' => 2,
+    'miercoles' => 3,
+    'jueves' => 4,
+    'viernes' => 5,
+    'sabado' => 6,
+    'domingo' => 7,
+];
+
+$diaObjetivo = $mapaDias[$dia_semana] ?? null;
+
+$fechaActual = new DateTime($fecha_inicio_curso);
+$fechaFin = new DateTime($fecha_fin_curso);
+
+while ($fechaActual <= $fechaFin) {
+    if ((int)$fechaActual->format('N') === $diaObjetivo) {
+        $fechaClase = $fechaActual->format('Y-m-d');
+
         $stmtClase->bind_param(
             "iisssi",
             $grupo_id,
             $sala_id,
-            $fecha_inicio_curso,
+            $fechaClase,
             $hora_inicio,
             $hora_fin,
             $cupo_maximo
         );
 
         $stmtClase->execute();
+    }
+
+    $fechaActual->modify('+1 day');
+}
 
         header('Location: ' . BASE_URL . '/admin/grupos?creado=1');
         exit;

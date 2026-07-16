@@ -35,9 +35,16 @@ $diasCortos = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
 $pagina    = $pagina    ?? 1;
 $porPagina = $porPagina ?? 4;
 $csrfToken = $csrfToken ?? '';
+
+// Tipo de asistencia que está mostrando la vista: clase o evento.
+$tipo = $tipo ?? 'clase';
+
+// Unifica el detalle para no depender del origen.
+$detalleAsistencia = $detalleAsistencia ?? null;
+
 ?>
 
-            <?php if (!$detalleClase): ?>
+            <?php if (!$detalleAsistencia): ?>
                 <div class="etiqueta">CONTROL DE ASISTENCIA</div>
                 <h1>Tus próximas clases</h1>
 
@@ -115,7 +122,7 @@ $csrfToken = $csrfToken ?? '';
                     <?php endif; ?>
                 </section>
 
-            <?php elseif ($detalleClase): ?>
+            <?php elseif ($tipo === 'clase' && $detalleClase): ?>
                 <?php $info = $iconoPara($detalleClase['grupo_tipo']); ?>
                 <section class="asist-hero">
                     <div class="asist-hero-icono" aria-hidden="true"><?= $info['icono'] ?></div>
@@ -128,7 +135,7 @@ $csrfToken = $csrfToken ?? '';
                             <span><span aria-hidden="true">&#128205;</span> <?= htmlspecialchars($detalleClase['sala_nombre'] ?? '-') ?></span>
                         </div>
                     </div>
-                    <a class="asist-volver" href="<?= BASE_URL ?>/profesor/asistencia">&larr; Volver</a>
+                    <a class="asist-volver" href="<?= BASE_URL ?>/profesor">&larr; Volver</a>
                 </section>
 
                 <section class="asist-resumen">
@@ -277,6 +284,47 @@ $csrfToken = $csrfToken ?? '';
                         <?php endif; ?>
                     </section>
                 </form>
+
+
+<?php elseif ($tipo === 'evento' && $detalleEvento): ?>
+
+    <section class="asist-hero">
+        <div class="asist-hero-icono" aria-hidden="true">🎭</div>
+
+        <div class="asist-hero-info">
+            <div class="asist-hero-etiqueta">
+                Evento especial
+            </div>
+
+            <div class="asist-hero-titulo">
+                <?= htmlspecialchars($detalleEvento['nombre']) ?>
+            </div>
+
+            <div class="asist-hero-meta">
+                <span>
+                    📅 <?= date('d/m/Y', strtotime($detalleEvento['fecha'])) ?>
+                </span>
+
+                <?php if (!empty($detalleEvento['hora'])): ?>
+                    <span>
+                        🕒 <?= htmlspecialchars(substr($detalleEvento['hora'], 0, 5)) ?>
+                    </span>
+                <?php endif; ?>
+
+                <span>
+                    👥 <?= count($alumnos) ?> alumnos inscritos
+                </span>
+            </div>
+        </div>
+
+        <a class="asist-volver" href="<?= BASE_URL ?>/profesor">
+    &larr; Volver
+</a>
+    </section>
+
+   <?php require __DIR__ . '/_pase_lista.php'; ?>
+
+
             <?php else: ?>
                 <section class="profesor-seccion">
                     <p class="vacio">No se ha podido cargar esa clase o no tienes permiso para verla.</p>
