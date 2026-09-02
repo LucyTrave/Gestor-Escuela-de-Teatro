@@ -543,7 +543,12 @@ $eventosEspeciales = $stmtEventos
         $params = [];
 
         if (!$this->esAdmin()) {
-            $where[] = '(ag.grupo_id IS NULL OR (g.profesor_id = ? AND g.activo = TRUE))';
+           $where[] = '(ag.grupo_id IS NULL OR (
+                g.profesor_id = ?
+                AND g.activo = TRUE
+                AND (g.fecha_inicio_curso IS NULL OR g.fecha_inicio_curso <= CURDATE())
+                AND (g.fecha_fin_curso IS NULL OR g.fecha_fin_curso >= CURDATE())
+            ))';
             $tipos  .= 's';
             $params[] = $this->profesorId();
 
