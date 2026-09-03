@@ -1,176 +1,187 @@
-# LSM_M26_GS004_Gest_asistencia-main
+# Gestor Escuela de Teatro
 
-Aplicación web en PHP para la gestión de una escuela de teatro. El proyecto organiza la experiencia por roles (`admin`, `profesor`, `alumno`) y cubre operaciones como acceso autenticado, gestión de alumnado, grupos, eventos y recuperación de clases mediante tokens.
+Aplicación web para gestionar la actividad académica de una escuela de teatro mediante accesos diferenciados para **administración, profesorado y alumnado**.
 
-## Qué incluye
+El sistema centraliza la gestión de alumnos, matrículas, grupos, salas, clases, asistencia, eventos especiales y recuperación de clases mediante tokens.
 
-- Login con redirección por rol.
-- Panel de administración con:
-  - alumnos posibles
-  - alumnos matriculados
-  - grupos
-  - eventos especiales
-- Panel de profesorado con gestión de alumnos, grupos, clases y asistencia.
-- Panel de alumnado con:
-  - próximas clases
-  - aviso de ausencias
-  - generación y uso de tokens
-  - solicitud de recuperaciones
-  - calendario mensual
+> Este repositorio contiene una versión personal de un proyecto desarrollado inicialmente en equipo durante la formación de Desarrollo de Aplicaciones Web. Mi trabajo se centró principalmente en el área de administración y, posteriormente, incorporé mejoras en las funcionalidades y vistas de los tres roles.
 
-## Stack
+## Funcionalidades principales
+
+### Administración
+
+- Gestión de posibles alumnos y alumnos matriculados.
+- Creación, edición y eliminación de grupos.
+- Asignación de profesores, salas, niveles y horarios.
+- Gestión de matrículas.
+- Organización de eventos y grupos especiales.
+- Panel resumen con los principales datos de la escuela.
+
+### Profesorado
+
+- Consulta del alumnado asignado.
+- Gestión de grupos, clases y horarios.
+- Registro y seguimiento de asistencia.
+- Consulta del calendario y de la agenda de clases.
+
+### Alumnado
+
+- Consulta de próximas clases y calendario mensual.
+- Comunicación anticipada de ausencias.
+- Obtención de tokens por ausencias avisadas con al menos 24 horas de antelación.
+- Acumulación de hasta cuatro tokens.
+- Solicitud de recuperación de clases de improvisación con plazas disponibles.
+- Consulta del saldo y del historial de movimientos.
+
+## Tecnologías
 
 - PHP
-- MySQL
-- HTML, CSS y JavaScript
-- Entorno pensado para XAMPP
+- MySQL y SQL
+- HTML5
+- CSS3
+- JavaScript
+- Programación orientada a objetos
+- Git y GitHub
 
-No usa Composer ni framework; el enrutado y la carga de controladores se hacen de forma manual.
+La aplicación utiliza `mysqli`, enrutado manual y una organización separada en controladores, modelos y vistas. No utiliza frameworks ni Composer.
+
+## Capturas de pantalla
+
+### Acceso al sistema
+
+Inicio de sesión con redirección al área correspondiente según el tipo de usuario.
+
+![Pantalla de acceso](capturas/01-acceso.png)
+
+### Panel de administración
+
+Resumen de posibles alumnos, matrículas activas, grupos y eventos.
+
+![Panel de administración](capturas/02-panel-administracion.png)
+
+### Gestión de grupos
+
+Vista para consultar, crear, editar y eliminar grupos, con información sobre nivel, horario, profesor, sala y alumnado asignado.
+
+![Gestión de grupos](capturas/03-gestion-grupos.png)
+
+### Panel del profesorado
+
+Acceso a alumnado, grupos, clases, asistencia, calendario y agenda.
+
+![Panel del profesorado](capturas/04-panel-profesorado.png)
+
+### Panel del alumnado
+
+Consulta de próximas clases, calendario, recuperaciones y tokens.
+
+![Panel del alumnado](capturas/05-panel-alumnado.png)
+
+### Sistema de tokens
+
+Explicación del proceso de obtención y uso de tokens, saldo disponible e historial de movimientos. Los datos mostrados pertenecen al curso 2025–2026, cuyos tokens caducan al finalizar el curso.
+
+![Sistema de tokens](capturas/06-sistema-tokens.png)
 
 ## Estructura del proyecto
 
-```
-LSM_M26_GS004_Gest_asistencia-main/
+```text
+Gestor-Escuela-de-Teatro/
 ├── app/
 │   ├── controllers/
 │   ├── models/
 │   └── views/
 ├── config/
 │   └── database.php
+├── database/
 ├── public/
 │   ├── css/
 │   └── js/
 ├── routes/
 │   └── web.php
+├── sql/
 ├── index.php
 └── setup.php
 ```
 
-## Requisitos
+## Instalación local
 
-- XAMPP con Apache y MySQL activos
-- PHP con extensión `mysqli`
-- Acceso local al directorio `htdocs`
+### Requisitos
 
-## Puesta en marcha
+- XAMPP o un entorno equivalente con Apache, PHP y MySQL.
+- Extensión `mysqli` habilitada.
 
-1. Coloca el proyecto en:
-   - `/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main`
-2. Inicia Apache y MySQL desde XAMPP.
-3. Abre en el navegador:
-   - [`http://localhost/LSM_M26_GS004_Gest_asistencia-main/setup.php`](http://localhost/LSM_M26_GS004_Gest_asistencia-main/setup.php)
-4. El script `setup.php` crea:
-   - la base de datos `punto_de_partida`
-   - las tablas necesarias
-   - salas y grupos iniciales
-   - usuarios de demostración
-5. Entra en la aplicación desde:
-   - [`http://localhost/LSM_M26_GS004_Gest_asistencia-main/`](http://localhost/LSM_M26_GS004_Gest_asistencia-main/)
-6. (Opcional) Para datos de prueba:
-   - Importa `sql/datos_prueba_alumno.sql` en phpMyAdmin
-   - Importa `sql/datos_invitado.sql` en phpMyAdmin
+### Pasos
 
-## Configuración de base de datos
+1. Clona el repositorio o descarga sus archivos dentro de la carpeta `htdocs`:
 
-La conexión está definida en [config/database.php](/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main/config/database.php) con valores por defecto de XAMPP:
+   ```bash
+   git clone https://github.com/LucyTrave/Gestor-Escuela-de-Teatro.git
+   ```
 
-- servidor: `localhost`
-- usuario: `root`
-- contraseña: vacía
-- base de datos: `punto_de_partida`
+2. Inicia Apache y MySQL.
 
-Si tu entorno usa otras credenciales, cambia esos valores antes de arrancar.
+3. Abre `setup.php` en el navegador para crear la base de datos, las tablas y los datos iniciales:
 
-## Usuarios demo
+   ```text
+   http://localhost/Gestor-Escuela-de-Teatro/setup.php
+   ```
 
-Después de ejecutar `setup.php`, quedan disponibles estos accesos:
+   Si Apache utiliza otro puerto, inclúyelo en la dirección. Por ejemplo:
 
-| Rol | Email | Contraseña |
+   ```text
+   http://localhost:8080/Gestor-Escuela-de-Teatro/setup.php
+   ```
+
+4. Accede a la aplicación:
+
+   ```text
+   http://localhost/Gestor-Escuela-de-Teatro/
+   ```
+
+5. Si el proyecto se guarda con otro nombre de carpeta, sustituye `Gestor-Escuela-de-Teatro` por ese nombre en la dirección.
+
+## Configuración de la base de datos
+
+La conexión se encuentra en `config/database.php`. La configuración local predeterminada utiliza:
+
+- Servidor: `localhost`
+- Usuario: `root`
+- Contraseña: vacía
+- Base de datos: `punto_de_partida`
+
+Si tu entorno utiliza otros datos de acceso, modifícalos antes de ejecutar la instalación.
+
+## Usuarios de demostración
+
+Después de ejecutar `setup.php`, se pueden utilizar los siguientes accesos:
+
+| Acceso | Correo | Contraseña |
 | --- | --- | --- |
-| Admin | `lucia@mail.com` | `1234` |
-| Profesor | `luis@mail.com` | `1234` |
-| Alumno | `juan@mail.com` | `1234` |
+| Administración | `lucia@mail.com` | `1234` |
+| Profesorado | `luis@mail.com` | `1234` |
+| Alumnado | `juan@mail.com` | `1234` |
+| Invitado | `maria@mail.com` | `1234` |
 
-## Rutas principales
+Estas credenciales son exclusivamente datos de demostración para ejecución local.
 
-### Autenticación
+## Lógica de negocio destacada
 
-- `/`
-- `/login`
-- `/logout`
-- `/dashboard`
-
-### Admin
-
-- `/admin`
-- `/admin/posibles`
-- `/admin/matriculados`
-- `/admin/grupos`
-- `/admin/especiales`
-- `/admin/especiales/gestionar`
-- `/admin/alumnos/crear`
-- `/admin/alumnos/detalle`
-- `/admin/alumnos/editar`
-
-### Profesor
-
-- `/profesor`
-- `/profesor/alumnos`
-- `/profesor/grupos`
-- `/profesor/clases`
-- `/profesor/asistencia`
-
-### Alumno
-
-- `/alumno`
-- `/alumno/tokens`
-- `/alumno/recuperar`
-- `/alumno/calendario`
-
-## Modelo de datos
-
-El script de instalación crea, entre otras, estas tablas:
-
-- `usuario`
-- `admin`
-- `profesor`
-- `alumno`
-- `grupo`
-- `alumno_grupo`
-- `clase`
-- `asistencia`
-- `token`
-- `recuperacion`
-- `bloque_pago`
-- `evento_grupal`
-- `inscripcion_evento`
-- `sala`
-- `horario_posible`
-
-La lógica de negocio principal gira alrededor de:
-
-- usuarios y roles
-- matrícula y asignación de grupos
-- clases programadas
-- control de asistencia
-- tokens por ausencias avisadas con antelación
-- recuperación de clases
-- eventos grupales
-
-## Arquitectura
-
-- [index.php](/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main/index.php) define `ROOT` y `BASE_URL`, carga la conexión y el enrutador.
-- [routes/web.php](/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main/routes/web.php) resuelve las rutas mediante condicionales.
-- Los controladores están en [app/controllers](/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main/app/controllers).
-- Las vistas están separadas por rol dentro de [app/views](/Applications/XAMPP/xamppfiles/htdocs/LSM_M26_GS004_Gest_asistencia-main/app/views).
-
-## Notas de funcionamiento
-
-- `BASE_URL` se calcula automáticamente a partir del directorio donde vive el proyecto.
-- El acceso al panel cambia según el rol autenticado.
-- En alumnado, avisar una ausencia con al menos 24 horas de antelación puede generar un token, con un máximo de 4 tokens disponibles.
-- La caducidad del token demo está fijada actualmente en `30-06-2026`.
+- Autenticación y redirección según el rol.
+- Relación entre alumnos, grupos, profesores, salas y clases.
+- Registro de asistencia.
+- Generación de tokens al avisar una ausencia con la antelación establecida.
+- Control de un máximo de cuatro tokens disponibles.
+- Recuperación de clases utilizando tokens.
+- Cancelación relacionada entre avisos, tokens y recuperaciones.
+- Gestión de eventos especiales e inscripciones.
 
 ## Estado del proyecto
 
-En desarrollo.
+Proyecto funcional en entorno local y en mejora continua. No dispone de una demostración pública porque necesita un servidor con PHP y MySQL; el funcionamiento puede revisarse mediante el código, las instrucciones de instalación y las capturas incluidas.
+
+## Autora
+
+**Lucía Jiménez Travé**  
+Desarrolladora Web Junior  
+[Perfil de GitHub](https://github.com/LucyTrave)
