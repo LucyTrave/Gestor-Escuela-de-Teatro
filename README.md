@@ -180,6 +180,14 @@ Estas credenciales son exclusivamente datos de demostración para ejecución loc
 
 Proyecto funcional en entorno local y en mejora continua. No dispone de una demostración pública porque necesita un servidor con PHP y MySQL; el funcionamiento puede revisarse mediante el código, las instrucciones de instalación y las capturas incluidas.
 
+## Documentación
+
+- [Manual de usuario](documentacion/Manual_usuario_Gestor_Escuela_Teatro.pdf)
+- [Documentación técnica](documentacion/Documentacion_tecnica_Gestor_Escuela_Teatro.pdf)
+
+Ambos documentos proceden del trabajo realizado en equipo y han sido revisados para esta versión personal de portfolio.
+
+
 ## Autora
 
 **Lucía Jiménez Travé**  
