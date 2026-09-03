@@ -51,37 +51,37 @@ La aplicación utiliza `mysqli`, enrutado manual y una organización separada en
 
 Inicio de sesión con redirección al área correspondiente según el tipo de usuario.
 
-![Pantalla de acceso](capturas/01-acceso.png)
+![Pantalla de acceso](01-acceso.png)
 
 ### Panel de administración
 
 Resumen de posibles alumnos, matrículas activas, grupos y eventos.
 
-![Panel de administración](capturas/02-panel-administracion.png)
+![Panel de administración](02-panel-administracion.png)
 
 ### Gestión de grupos
 
 Vista para consultar, crear, editar y eliminar grupos, con información sobre nivel, horario, profesor, sala y alumnado asignado.
 
-![Gestión de grupos](capturas/03-gestion-grupos.png)
+![Gestión de grupos](03-gestion-grupos.png)
 
 ### Panel del profesorado
 
 Acceso a alumnado, grupos, clases, asistencia, calendario y agenda.
 
-![Panel del profesorado](capturas/04-panel-profesorado.png)
+![Panel del profesorado](04-panel-profesorado.png)
 
 ### Panel del alumnado
 
 Consulta de próximas clases, calendario, recuperaciones y tokens.
 
-![Panel del alumnado](capturas/05-panel-alumnado.png)
+![Panel del alumnado](05-panel-alumnado.png)
 
 ### Sistema de tokens
 
 Explicación del proceso de obtención y uso de tokens, saldo disponible e historial de movimientos. Los datos mostrados pertenecen al curso 2025–2026, cuyos tokens caducan al finalizar el curso.
 
-![Sistema de tokens](capturas/06-sistema-tokens.png)
+![Sistema de tokens](06-sistema-tokens.png)
 
 ## Estructura del proyecto
 
