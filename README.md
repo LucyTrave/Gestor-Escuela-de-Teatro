@@ -182,8 +182,8 @@ Proyecto funcional en entorno local y en mejora continua. No dispone de una demo
 
 ## Documentación
 
-- [Manual de usuario](documentacion/Manual_usuario_Gestor_Escuela_Teatro.pdf)
-- [Documentación técnica](documentacion/Documentacion_tecnica_Gestor_Escuela_Teatro.pdf)
+- [Manual de usuario](Manual_usuario_Gestor_Escuela_Teatro.pdf)
+- [Documentación técnica](Documentacion_tecnica_Gestor_Escuela_Teatro.pdf)
 
 Ambos documentos proceden del trabajo realizado en equipo y han sido revisados para esta versión personal de portfolio.
 
